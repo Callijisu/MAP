@@ -1,0 +1,322 @@
+[
+  {
+    "policy_id": "JOB_001",
+    "title": "청년내일채움공제",
+    "category": "일자리",
+    "agency": "고용노동부",
+    "description": "중소기업에 정규직으로 취업한 청년의 자산형성을 지원하는 적금상품",
+    "target_age_min": 15,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["구직자"],
+    "target_income_max": 60000,
+    "budget_min": 300,
+    "budget_max": 1200,
+    "benefit": "2년 만기시 300만원~1200만원 지급",
+    "requirements": [
+      "중소기업 정규직 취업",
+      "2년간 재직 유지",
+      "월 12.5만원 적립 (본인 부담)"
+    ],
+    "documents": [
+      "재직증명서",
+      "근로계약서",
+      "공제가입신청서"
+    ],
+    "application_url": "https://www.work.go.kr",
+    "deadline": "연중 상시",
+    "contact": {
+      "department": "고용노동부 청년고용정책과",
+      "phone": "1350",
+      "email": "youth@moel.go.kr"
+    }
+  },
+  {
+    "policy_id": "JOB_002",
+    "title": "청년일자리도약장려금",
+    "category": "일자리",
+    "agency": "고용노동부",
+    "description": "청년의 정규직 전환을 지원하는 기업 대상 장려금",
+    "target_age_min": 15,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["구직자"],
+    "target_income_max": 70000,
+    "budget_min": 600,
+    "budget_max": 900,
+    "benefit": "정규직 전환시 기업에 월 60만원~90만원 지원 (최대 1년)",
+    "requirements": [
+      "6개월 이상 비정규직 근무",
+      "정규직 전환",
+      "고용보험 가입 유지"
+    ],
+    "documents": [
+      "고용보험가입증명서",
+      "근로계약서",
+      "급여명세서"
+    ],
+    "application_url": "https://www.work.go.kr",
+    "deadline": "2024년 12월 31일",
+    "contact": {
+      "department": "고용노동부 청년고용정책과",
+      "phone": "1350",
+      "email": "youth@moel.go.kr"
+    }
+  },
+  {
+    "policy_id": "JOB_003",
+    "title": "국민취업지원제도",
+    "category": "일자리",
+    "agency": "고용노동부",
+    "description": "저소득 구직자, 청년 등에게 통합적 취업지원서비스 제공",
+    "target_age_min": 18,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["구직자", "무직"],
+    "target_income_max": 36000,
+    "budget_min": 50,
+    "budget_max": 300,
+    "benefit": "월 50만원 구직촉진수당 지급 (최대 6개월), 취업성공수당 최대 150만원",
+    "requirements": [
+      "구직급여 미수급자",
+      "기준중위소득 60% 이하",
+      "취업지원서비스 참여"
+    ],
+    "documents": [
+      "소득증명서",
+      "구직신청서",
+      "거주지 확인서류"
+    ],
+    "application_url": "https://www.kua.go.kr",
+    "deadline": "연중 상시",
+    "contact": {
+      "department": "고용노동부 고용서비스정책과",
+      "phone": "1350",
+      "email": "kua@moel.go.kr"
+    }
+  },
+  {
+    "policy_id": "FIN_001",
+    "title": "청년희망적금",
+    "category": "금융",
+    "agency": "기획재정부",
+    "description": "저소득 청년의 자산형성을 위한 정부지원 적금상품",
+    "target_age_min": 19,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["재직자", "구직자"],
+    "target_income_max": 36000,
+    "budget_min": 10,
+    "budget_max": 50,
+    "benefit": "월 10만원 적립시 정부지원금 10만원 추가 적립 (2년)",
+    "requirements": [
+      "기준중위소득 180% 이하",
+      "금융교육 이수",
+      "월 10~50만원 적립"
+    ],
+    "documents": [
+      "소득증명서",
+      "신분증",
+      "통장사본"
+    ],
+    "application_url": "https://www.finlife.or.kr",
+    "deadline": "2024년 12월 31일",
+    "contact": {
+      "department": "금융위원회 서민금융과",
+      "phone": "02-2100-2800",
+      "email": "youth@fss.or.kr"
+    }
+  },
+  {
+    "policy_id": "FIN_002",
+    "title": "청년도약계좌",
+    "category": "금융",
+    "agency": "기획재정부",
+    "description": "청년의 중장기 자산형성을 위한 장기저축 지원상품",
+    "target_age_min": 19,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["재직자", "구직자"],
+    "target_income_max": 75000,
+    "budget_min": 40,
+    "budget_max": 70,
+    "benefit": "5년 만기시 연 5.0% 금리 적용, 최대 1800만원 지급",
+    "requirements": [
+      "개인소득 7500만원 이하",
+      "5년간 가입 유지",
+      "월 40~70만원 적립"
+    ],
+    "documents": [
+      "소득증명서",
+      "재직증명서",
+      "신분증"
+    ],
+    "application_url": "https://www.finlife.or.kr",
+    "deadline": "2024년 12월 31일",
+    "contact": {
+      "department": "기획재정부 금융정책과",
+      "phone": "044-215-4350",
+      "email": "youth@mosf.go.kr"
+    }
+  },
+  {
+    "policy_id": "HOU_001",
+    "title": "청년 전세자금대출",
+    "category": "주거",
+    "agency": "국토교통부",
+    "description": "무주택 청년의 전세자금 대출 지원",
+    "target_age_min": 19,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["재직자", "구직자"],
+    "target_income_max": 60000,
+    "budget_min": 5000,
+    "budget_max": 20000,
+    "benefit": "전세자금 최대 2억원 대출, 연 1.8%~2.4% 우대금리",
+    "requirements": [
+      "무주택자",
+      "전세보증금 5억원 이하",
+      "부부합산 연소득 6000만원 이하"
+    ],
+    "documents": [
+      "소득증명서",
+      "전세계약서",
+      "무주택확인서"
+    ],
+    "application_url": "https://www.hf.go.kr",
+    "deadline": "연중 상시",
+    "contact": {
+      "department": "주택도시기금 콜센터",
+      "phone": "1588-8114",
+      "email": "fund@hf.go.kr"
+    }
+  },
+  {
+    "policy_id": "HOU_002",
+    "title": "청년 월세 지원",
+    "category": "주거",
+    "agency": "국토교통부",
+    "description": "저소득 청년의 월세 부담 경감을 위한 월세 지원",
+    "target_age_min": 19,
+    "target_age_max": 34,
+    "target_regions": ["전국"],
+    "target_employment": ["재직자", "구직자", "학생"],
+    "target_income_max": 36000,
+    "budget_min": 20,
+    "budget_max": 25,
+    "benefit": "월 최대 25만원 월세 지원 (최대 12개월)",
+    "requirements": [
+      "기준중위소득 60% 이하",
+      "임대차계약 체결",
+      "보증금 5천만원 이하"
+    ],
+    "documents": [
+      "임대차계약서",
+      "소득증명서",
+      "거주확인서류"
+    ],
+    "application_url": "https://www.myhome.go.kr",
+    "deadline": "2024년 10월 31일",
+    "contact": {
+      "department": "국토교통부 주거복지정책과",
+      "phone": "1600-1004",
+      "email": "housing@molit.go.kr"
+    }
+  },
+  {
+    "policy_id": "START_001",
+    "title": "청년창업지원금",
+    "category": "창업",
+    "agency": "중소벤처기업부",
+    "description": "예비창업자 및 초기창업자를 위한 창업자금 지원",
+    "target_age_min": 18,
+    "target_age_max": 39,
+    "target_regions": ["전국"],
+    "target_employment": ["구직자", "자영업"],
+    "target_income_max": 100000,
+    "budget_min": 1000,
+    "budget_max": 5000,
+    "benefit": "창업자금 최대 5000만원 지원, 멘토링 및 교육 프로그램",
+    "requirements": [
+      "사업자등록 후 3년 이내",
+      "사업계획서 제출",
+      "창업교육 이수"
+    ],
+    "documents": [
+      "사업자등록증",
+      "사업계획서",
+      "창업교육 수료증"
+    ],
+    "application_url": "https://www.k-startup.go.kr",
+    "deadline": "2024년 9월 30일",
+    "contact": {
+      "department": "중소벤처기업부 창업정책과",
+      "phone": "042-481-4300",
+      "email": "startup@mss.go.kr"
+    }
+  },
+  {
+    "policy_id": "WEL_001",
+    "title": "서울시 청년수당",
+    "category": "복지",
+    "agency": "서울특별시",
+    "description": "서울 거주 청년의 구직활동 및 역량개발 지원",
+    "target_age_min": 18,
+    "target_age_max": 34,
+    "target_regions": ["서울"],
+    "target_employment": ["구직자", "무직"],
+    "target_income_max": 36000,
+    "budget_min": 50,
+    "budget_max": 50,
+    "benefit": "월 50만원 지급 (최대 6개월)",
+    "requirements": [
+      "서울 거주 3개월 이상",
+      "미취업 상태",
+      "구직활동 참여"
+    ],
+    "documents": [
+      "거주지 확인서류",
+      "구직활동계획서",
+      "소득증명서"
+    ],
+    "application_url": "https://youth.seoul.go.kr",
+    "deadline": "2024년 11월 30일",
+    "contact": {
+      "department": "서울시 청년정책과",
+      "phone": "02-2133-5200",
+      "email": "youth@seoul.go.kr"
+    }
+  },
+  {
+    "policy_id": "WEL_002",
+    "title": "경기청년 기본소득",
+    "category": "복지",
+    "agency": "경기도",
+    "description": "경기도 거주 청년의 사회진입 지원을 위한 기본소득",
+    "target_age_min": 24,
+    "target_age_max": 29,
+    "target_regions": ["경기"],
+    "target_employment": ["재직자", "구직자", "자영업"],
+    "target_income_max": 0,
+    "budget_min": 100,
+    "budget_max": 100,
+    "benefit": "분기별 25만원 지역화폐 지급 (연 100만원)",
+    "requirements": [
+      "경기도 거주 3년 이상",
+      "24~29세",
+      "소득수준 무관"
+    ],
+    "documents": [
+      "거주지 확인서류",
+      "신분증",
+      "주민등록등본"
+    ],
+    "application_url": "https://basicincome.gg.go.kr",
+    "deadline": "2024년 12월 31일",
+    "contact": {
+      "department": "경기도 청년정책과",
+      "phone": "031-8008-2000",
+      "email": "youth@gg.go.kr"
+    }
+  }
+]
