@@ -4,36 +4,97 @@ Multi-Agent 협업 기반 청년 맞춤형 정책자금 추천 시스템
 """
 
 import os
-from fastapi import FastAPI, HTTPException
+import time
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Query, Path, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
-from dotenv import load_dotenv
-import pymongo
-from pymongo import MongoClient
-import uvicorn
+from datetime import datetime
+
+# Core modules
+from core.config import get_settings
+from core.logging import setup_logging, get_api_logger, log_system_info
+from core.performance import setup_performance_optimizations, get_performance_stats, monitor_performance, cache_manager
+from core.security import (
+    SecureBaseModel, SecureProfileRequest, rate_limit, secure_endpoint,
+    get_security_headers, SecurityMiddleware
+)
 
 # MongoDB 핸들러 및 Agent 임포트
 from database.mongo_handler import get_mongodb_handler
 
-# 환경 변수 로드
-load_dotenv()
+# 설정 로드
+settings = get_settings()
+api_logger = get_api_logger()
+
+# 애플리케이션 생명주기 관리
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """애플리케이션 시작 및 종료 이벤트 관리"""
+    # 시작 이벤트
+    setup_logging()
+    log_system_info()
+
+    # MongoDB 연결 및 성능 최적화
+    global mongo_handler
+    try:
+        mongo_handler = get_mongodb_handler()
+        if mongo_handler and mongo_handler.is_connected:
+            setup_performance_optimizations(mongo_handler)
+            api_logger.info("시스템 초기화 완료")
+    except Exception as e:
+        api_logger.error(f"시스템 초기화 실패: {e}")
+
+    yield
+
+    # 종료 이벤트
+    api_logger.info("시스템 종료")
 
 # FastAPI 앱 생성
 app = FastAPI(
-    title="청년 정책 추천 시스템 API",
-    description="Multi-Agent 협업 기반 청년 맞춤형 정책자금 추천 시스템",
-    version="1.0.0"
+    title=settings.app_name,
+    description="""Multi-Agent 협업 기반 청년 맞춤형 정책자금 추천 시스템
+
+## 🎯 주요 기능
+
+- **🔐 보안 강화**: 입력 검증, 레이트 제한, XSS 방지
+- **⚡ 성능 최적화**: 캐싱, 인덱싱, 모니터링
+- **👤 프로필 관리**: 사용자 프로필 생성, 조회, 수정
+- **📊 정책 조회**: 필터링 및 페이지네이션 지원
+- **🎯 맞춤 추천**: AI 기반 개인화된 정책 추천
+- **🔍 매칭 시스템**: 정확한 정책 매칭 알고리즘
+- **🤖 설명 생성**: GPT 기반 정책 설명
+- **📈 모니터링**: 실시간 성능 및 사용 통계
+
+## 🚀 시작하기
+
+1. 프로필 생성: `POST /api/profile`
+2. 정책 조회: `GET /api/policies`
+3. 통합 추천: `POST /api/orchestrator`
+4. 성능 통계: `GET /api/stats`
+""",
+    version=settings.app_version,
+    contact={
+        "name": "청년 정책 추천 시스템 팀",
+        "email": "contact@youth-policy.kr"
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT"
+    },
+    lifespan=lifespan
 )
 
+# 보안 미들웨어 추가
+app.add_middleware(SecurityMiddleware)
+
 # CORS 미들웨어 설정
+cors_config = settings.get_cors_config()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    **cors_config
 )
 
 # MongoDB 핸들러 전역 인스턴스
@@ -56,17 +117,37 @@ async def startup_event():
 # Pydantic 모델들
 class ProfileRequest(BaseModel):
     """프로필 생성 요청 모델"""
-    age: int
-    region: str
-    income: int
-    employment: str
-    interest: Optional[str] = None
+    age: int = Field(..., ge=18, le=39, description="나이 (18-39세)")
+    region: str = Field(..., min_length=1, description="거주 지역")
+    income: int = Field(..., ge=0, description="연소득 (만원 단위)")
+    employment: str = Field(..., description="고용 상태 (구직자, 재직자, 자영업 등)")
+    interest: Optional[str] = Field(None, description="관심 분야")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "age": 28,
+                "region": "서울",
+                "income": 3000,
+                "employment": "재직자",
+                "interest": "창업"
+            }
+        }
 
 class ProfileResponse(BaseModel):
     """프로필 생성 응답 모델"""
     success: bool
     profile_id: str
     message: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "success": True,
+                "profile_id": "profile_123456789",
+                "message": "프로필이 성공적으로 생성되었습니다. (데이터베이스 저장 완료)"
+            }
+        }
 
 class PolicyItem(BaseModel):
     """정책 항목 모델"""
@@ -168,7 +249,13 @@ class OrchestratorResponse(BaseModel):
 
 
 # 기본 엔드포인트
-@app.get("/", response_model=Dict[str, Any])
+@app.get(
+    "/",
+    response_model=Dict[str, Any],
+    tags=["시스템 정보"],
+    summary="시스템 정보 조회",
+    description="청년 정책 추천 시스템의 기본 정보와 사용 가능한 엔드포인트 목록을 반환합니다."
+)
 async def root():
     """시스템 정보 반환"""
     return {
@@ -189,7 +276,13 @@ async def root():
         }
     }
 
-@app.get("/health", response_model=Dict[str, Any])
+@app.get(
+    "/health",
+    response_model=Dict[str, Any],
+    tags=["시스템 정보"],
+    summary="헬스 체크",
+    description="시스템과 데이터베이스의 연결 상태를 확인합니다."
+)
 async def health_check():
     """헬스 체크 (MongoDB 상태 포함)"""
     health_status = {
@@ -222,8 +315,19 @@ async def health_check():
     return health_status
 
 
-# 임시 API 엔드포인트들
-@app.post("/api/profile", response_model=ProfileResponse)
+# API 엔드포인트들
+@app.post(
+    "/api/profile",
+    response_model=ProfileResponse,
+    tags=["프로필 관리"],
+    summary="프로필 생성",
+    description="사용자의 기본 정보를 받아 프로필을 생성하고 데이터베이스에 저장합니다.",
+    responses={
+        200: {"description": "프로필 생성 성공"},
+        400: {"description": "잘못된 요청 데이터"},
+        500: {"description": "서버 오류"}
+    }
+)
 async def create_profile(profile_data: ProfileRequest):
     """프로필 생성 (Agent1 + MongoDB 통합)"""
     try:
@@ -259,8 +363,191 @@ async def create_profile(profile_data: ProfileRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"프로필 생성 중 오류가 발생했습니다: {str(e)}")
 
-@app.get("/api/policies", response_model=List[PolicyItem])
-async def get_policies(category: Optional[str] = None):
+
+@app.get(
+    "/api/policy/{policy_id}",
+    tags=["정책 조회"],
+    summary="정책 상세 조회",
+    description="특정 정책 ID를 사용하여 상세 정보를 조회합니다.",
+    responses={
+        200: {"description": "정책 상세 정보"},
+        404: {"description": "정책을 찾을 수 없음"},
+        500: {"description": "서버 오류"}
+    }
+)
+async def get_policy_detail(policy_id: str = Path(..., description="조회할 정책 ID")):
+    """정책 상세 조회"""
+    try:
+        from agents.agent2_data import Agent2
+
+        use_database = mongo_handler is not None and mongo_handler.is_connected
+        agent2 = Agent2(use_database=use_database)
+
+        # 특정 정책 조회
+        result = agent2.get_policy_by_id(policy_id)
+
+        if result and result.get("success"):
+            policy = result["policy"]
+            return {
+                "success": True,
+                "policy": {
+                    "id": policy.get("policy_id"),
+                    "title": policy.get("title"),
+                    "description": policy.get("benefit"),
+                    "category": policy.get("category"),
+                    "target_age": f"{policy.get('target_age_min', 18)}-{policy.get('target_age_max', 39)}세",
+                    "target_region": policy.get("target_regions", ["전국"]),
+                    "target_employment": policy.get("target_employment", []),
+                    "budget_max": policy.get("budget_max"),
+                    "deadline": policy.get("deadline"),
+                    "application_url": policy.get("application_url")
+                },
+                "message": "정책 상세 조회 완료"
+            }
+        else:
+            raise HTTPException(status_code=404, detail="해당 정책을 찾을 수 없습니다.")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"정책 조회 중 오류가 발생했습니다: {str(e)}")
+
+
+@app.put(
+    "/api/profile/{user_id}",
+    tags=["프로필 관리"],
+    summary="프로필 수정",
+    description="사용자 ID를 사용하여 프로필 정보를 업데이트합니다.",
+    responses={
+        200: {"description": "프로필 수정 성공"},
+        404: {"description": "프로필을 찾을 수 없음"},
+        500: {"description": "서버 오류"}
+    }
+)
+async def update_profile(
+    user_id: str = Path(..., description="업데이트할 사용자 ID"),
+    profile_data: ProfileRequest = ...
+):
+    """프로필 수정"""
+    try:
+        if not mongo_handler or not mongo_handler.is_connected:
+            raise HTTPException(
+                status_code=503,
+                detail="데이터베이스에 연결되지 않았습니다."
+            )
+
+        from agents.agent1_profile import Agent1
+        agent1 = Agent1(use_database=True)
+
+        # 프로필 수정
+        result = agent1.update_profile(user_id, profile_data.dict())
+
+        if result.get("success"):
+            return {
+                "success": True,
+                "profile_id": user_id,
+                "message": "프로필이 성공적으로 업데이트되었습니다."
+            }
+        else:
+            raise HTTPException(status_code=404, detail=result.get("error", "프로필을 찾을 수 없습니다."))
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"프로필 업데이트 중 오류가 발생했습니다: {str(e)}")
+
+
+@app.get(
+    "/api/user/{user_id}/history",
+    tags=["사용자 이력"],
+    summary="추천 이력 조회",
+    description="사용자의 정책 추천 이력을 조회합니다.",
+    responses={
+        200: {"description": "추천 이력 조회 성공"},
+        404: {"description": "사용자를 찾을 수 없음"},
+        500: {"description": "서버 오류"}
+    }
+)
+async def get_user_history(user_id: str = Path(..., description="조회할 사용자 ID")):
+    """추천 이력 조회"""
+    try:
+        if not mongo_handler or not mongo_handler.is_connected:
+            # DB가 연결되지 않은 경우 더미 데이터 반환
+            return {
+                "success": True,
+                "user_id": user_id,
+                "history": [
+                    {
+                        "date": "2024-01-15T10:30:00Z",
+                        "session_id": "session_001",
+                        "recommended_policies": 5,
+                        "avg_score": 78.5,
+                        "top_category": "창업"
+                    },
+                    {
+                        "date": "2024-01-10T15:45:00Z",
+                        "session_id": "session_002",
+                        "recommended_policies": 3,
+                        "avg_score": 82.1,
+                        "top_category": "주거"
+                    }
+                ],
+                "total_sessions": 2,
+                "message": "추천 이력 조회 완료 (로컬 모드)"
+            }
+
+        # 실제 DB에서 조회
+        history_collection = mongo_handler.get_collection("recommendation_history")
+        history_records = list(history_collection.find({"user_id": user_id}).sort("created_at", -1))
+
+        if not history_records:
+            return {
+                "success": True,
+                "user_id": user_id,
+                "history": [],
+                "total_sessions": 0,
+                "message": "추천 이력이 없습니다."
+            }
+
+        # 이력 데이터 가공
+        history = []
+        for record in history_records:
+            history.append({
+                "date": record.get("created_at", datetime.now()).isoformat(),
+                "session_id": record.get("session_id"),
+                "recommended_policies": len(record.get("recommendations", [])),
+                "avg_score": record.get("avg_score", 0),
+                "top_category": record.get("top_category", "")
+            })
+
+        return {
+            "success": True,
+            "user_id": user_id,
+            "history": history,
+            "total_sessions": len(history),
+            "message": f"{len(history)}개의 추천 이력을 찾았습니다."
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"추천 이력 조회 중 오류가 발생했습니다: {str(e)}")
+
+@app.get(
+    "/api/policies",
+    response_model=List[PolicyItem],
+    tags=["정책 조회"],
+    summary="정책 목록 조회",
+    description="필터링 옵션과 함께 정책 목록을 조회합니다. 카테고리, 지역, 페이지네이션을 지원합니다.",
+    responses={
+        200: {"description": "정책 목록 조회 성공"},
+        500: {"description": "서버 오류"}
+    }
+)
+async def get_policies(
+    category: Optional[str] = Query(None, description="정책 카테고리 (예: 일자리, 주거, 창업)"),
+    region: Optional[str] = Query(None, description="대상 지역 (예: 서울, 경기)"),
+    page: int = Query(1, ge=1, description="페이지 번호"),
+    limit: int = Query(20, ge=1, le=100, description="페이지당 결과 수")
+):
     """정책 목록 조회 (Agent2 + MongoDB 연동)"""
     try:
         # Agent2 임포트 및 초기화
